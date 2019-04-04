@@ -3,11 +3,14 @@ import os
 import sys
 import pandas as pd
 
-columns = [
+exportedColumns = [
   'Centre financier',
   'N° EJ',
   'Fournisseur', # Fournisseur titulaire principal (EJ)
   'Date comptable du SF',
+]
+
+amountColumns = [
   'Bascule des EJ non soldés',
   'Montant engagé',
   'Montant certifié non soldé',
@@ -27,8 +30,11 @@ def getprops(filename):
 
 def prepare(path, filename):
   _, group, year = getprops(filename)
-  df = pd.read_excel(path, skiprows=2).rename(columns=renames)[columns]
+  df = pd.read_excel(path, skiprows=2).rename(columns=renames)[exportedColumns + amountColumns]
+
   df['Date comptable du SF'] = pd.to_datetime(df['Date comptable du SF'], format='%Y-%m-%d', errors='coerce')
+  for amount in amountColumns:
+    df[amount].fillna(0, inplace=True)
 
   df['Groupe'] = group
   df['Année'] = year

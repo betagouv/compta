@@ -28,8 +28,11 @@ def getprops(filename):
 def prepare(path, filename):
   _, group, year = getprops(filename)
   df = pd.read_excel(path, skiprows=2).rename(columns=renames)[columns]
+  df['Date comptable du SF'] = pd.to_datetime(df['Date comptable du SF'], format='%Y-%m-%d', errors='coerce')
+
   df['Groupe'] = group
   df['Année'] = year
+
   return df[df['Centre financier'].notna()]
 
 

@@ -1,2 +1,4 @@
+*.csv
+*.ods
 __pycache__
 .venv

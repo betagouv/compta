@@ -20,9 +20,12 @@ def test(folder):
 
   agg = pd.merge(ej, compta, how='outer', left_on='EJ', right_on='Numéro de BdC')
 
-  outpath = 'files/sanity-check-' + timestamp + '.csv'
-  print(outpath)
-  agg.to_csv(outpath, index=False, decimal=",", sep=";")
+  agg_outpath = 'files/sanity-check-' + timestamp + '.csv'
+  agg.to_csv(agg_outpath, index=False, decimal=",", sep=";")
+
+  ej_outpath = 'files/ej-' + timestamp + '.csv'
+  ej.to_csv(ej_outpath, index=False, decimal=",", sep=";")
+  return ej, compta, agg
 
 
 if __name__ == "__main__":

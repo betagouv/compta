@@ -53,7 +53,7 @@ def getrange(sheet, name):
 
 def aggregateEJ(data):
     df = data[['Numéro de BdC', 'Montant TTC']]
-    return df.groupby('Numéro de BdC').sum().reset_index()
+    return df.groupby('Numéro de BdC').sum().reset_index().rename(columns={'index': 'Numéro de BdC'})
 
 
 def getdata():
@@ -82,7 +82,10 @@ def getdata():
     service = build('sheets', 'v4', credentials=creds)
     sheet = service.spreadsheets()
     data = getrange(sheet, SHEET)
-    return pd.DataFrame(data[1:len(data)], columns=data[0])
+    df = pd.DataFrame(data[1:len(data)], columns=data[0])
+    df['Numéro de BdC'] = df['Numéro de BdC'].mask(df['Numéro de BdC'] == "", 0).astype('int64')
+
+    return df
 
 
 def main():

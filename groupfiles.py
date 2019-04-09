@@ -7,7 +7,7 @@ import numpy as np
 
 exportedColumns = [
   'Centre financier',
-  'N° EJ',
+  'EJ',
   'Fournisseur', # Fournisseur titulaire principal (EJ)
   'Date comptable du SF',
   'Groupe',
@@ -24,37 +24,60 @@ amountColumns = [
 ]
 
 renames = {
-  'Fournisseur titulaire principal (EJ)': 'Fournisseur'
+  'Fournisseur titulaire principal (EJ)': 'Fournisseur',
+  'N° EJ': 'EJ'
 }
 
 def getprops(filename):
   comps = filename.split('.')[0].split(' ');
   return comps[0], comps[1], int(comps[2])
 
-
-def prepare(path, filename):
-  _, group, year = getprops(filename)
+def openfile(path, filename):
   df = pd.read_excel(path, skiprows=2).rename(columns=renames)
 
-  df['Date comptable du SF'] = pd.to_datetime(df['Date comptable du SF'], format='%Y-%m-%d', errors='coerce')
-  df['N° EJ'] = df['N° EJ'].mask(df['N° EJ'] == "#", np.nan).astype('float')
+  _, group, year = getprops(filename)
+  df['Groupe'] = group
+  df['Année'] = year
+
+  return df
+
+
+def prepare(path, filename):
+  df = openfile(path, filename)
+  return filter(clean(df))
+
+
+def clean(df):
+  df['EJ'] = df['EJ'].mask((df['EJ'] == "#") | df['EJ'].isna(), 0).astype('int64')
 
   df['Date comptable du SF'] = pd.to_datetime(df['Date comptable du SF'], format='%Y-%m-%d', errors='coerce')
   for amount in amountColumns:
     df[amount].fillna(0, inplace=True)
 
-  df['Groupe'] = group
-  df['Année'] = year
+  return df
 
-  df_cf = df[df['Centre financier'].notna()]
-  filtered = df_cf[(df_cf['Centre financier'] != 'BG00/0129-CAHC-DISI') | (df_cf['Libellé centre de coûts'] != 'DINSIC INCUB')]
-  return filtered[exportedColumns + amountColumns]
+
+def filter(df):
+  df['EJ'] = df['EJ'].mask((df['EJ'] == "#") | df['EJ'].isna(), 0).astype('int64')
+
+  idx = df['Centre financier'].notna() & (
+    (df['Libellé centre de coûts'] == 'DINSIC INCUB') |
+    (
+      (df['Centre financier'] != 'BG00/0129-CAHC-DISI') &
+      (df['Centre financier'] != 'BG00/0129-CAHC-DRIE') &
+      (df['Centre financier'] != 'BG00/0129-CAHC-TRAN') &
+      (df['Centre financier'] != 'BG00/0129-CAHC-VTAM')
+)
+  )
+  return df[idx]
 
 
 def infbud(folder):
   excel_files = [f for f in os.listdir(folder) if f.endswith('.xlsx')]
   dfs = [prepare(os.path.join(folder, f), f.split('.')[0]) for f in excel_files]
-  return pd.concat(dfs)
+
+  df = pd.concat(dfs, sort=False)
+  return df
 
 
 def test(folder):
@@ -62,11 +85,11 @@ def test(folder):
   timestamp = now.isoformat().replace(':','-').replace('.', '-')
 
   df = infbud(folder)
-  print(df)
 
-  outpath = 'files/infbud-' + timestamp + '.csv'
-  print(outpath)
-  df.to_csv(outpath, index=False, decimal=",", sep=";")
+
+def testFilter():
+  
+  df = infbud(folder)
 
 
 if __name__ == "__main__":

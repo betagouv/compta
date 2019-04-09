@@ -13,14 +13,10 @@ columns = [
   'Année'
 ]
 
-renames = {
-  'N° EJ': 'EJ',
-}
-
 def infbud_ae(raw):
   raw['AE'] = raw['Montant engagé'] - raw['Bascule des EJ non soldés']
 
-  df = raw.rename(columns=renames)[columns]
+  df = raw[columns]
   agg =  df.groupby(['Centre financier', 'EJ', 'Année']).sum().reset_index()
 
   return agg[agg['AE'] != 0]

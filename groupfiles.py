@@ -1,13 +1,17 @@
+# -*- coding: utf-8 -*-
 import datetime
 import os
 import sys
 import pandas as pd
+import numpy as np
 
 exportedColumns = [
   'Centre financier',
   'N° EJ',
   'Fournisseur', # Fournisseur titulaire principal (EJ)
   'Date comptable du SF',
+  'Groupe',
+  'Année'
 ]
 
 amountColumns = [
@@ -30,7 +34,10 @@ def getprops(filename):
 
 def prepare(path, filename):
   _, group, year = getprops(filename)
-  df = pd.read_excel(path, skiprows=2).rename(columns=renames)[exportedColumns + amountColumns]
+  df = pd.read_excel(path, skiprows=2).rename(columns=renames)
+
+  df['Date comptable du SF'] = pd.to_datetime(df['Date comptable du SF'], format='%Y-%m-%d', errors='coerce')
+  df['N° EJ'] = df['N° EJ'].mask(df['N° EJ'] == "#", np.nan).astype('float')
 
   df['Date comptable du SF'] = pd.to_datetime(df['Date comptable du SF'], format='%Y-%m-%d', errors='coerce')
   for amount in amountColumns:
@@ -39,7 +46,9 @@ def prepare(path, filename):
   df['Groupe'] = group
   df['Année'] = year
 
-  return df[df['Centre financier'].notna()]
+  df_cf = df[df['Centre financier'].notna()]
+  filtered = df_cf[(df_cf['Centre financier'] != 'BG00/0129-CAHC-DISI') | (df_cf['Libellé centre de coûts'] != 'DINSIC INCUB')]
+  return filtered[exportedColumns + amountColumns]
 
 
 def infbud(folder):
@@ -55,7 +64,7 @@ def test(folder):
   df = infbud(folder)
   print(df)
 
-  outpath = 'infbud-' + timestamp + '.csv'
+  outpath = 'files/infbud-' + timestamp + '.csv'
   print(outpath)
   df.to_csv(outpath, index=False, decimal=",", sep=";")
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import datetime
 import os
 import sys
@@ -8,55 +9,36 @@ import groupfiles
 columns = [
   'Centre financier',
   'EJ',
-  'AE', 'CP',
-  'Période'
+  'AE',
+  'Année'
 ]
 
 renames = {
   'N° EJ': 'EJ',
 }
 
-def infbud(df):
-  df['AE'] = df['Montant engagé'] - df['Bascule des EJ non soldés']
-  df['CP'] = df['Montant certifié non soldé'] + df['Montant pré-enregistré'] + df['Montant facturé'] + df['Montant payé']
-  df['Période'] = df['Date comptable du SF']
-  df['Période'].mask(df['Période'].isna(), pd.to_datetime(df['Année'], format='%Y'), inplace=True)
+def infbud_ae(raw):
+  raw['AE'] = raw['Montant engagé'] - raw['Bascule des EJ non soldés']
 
-  return df.rename(columns=renames)[columns]
+  df = raw.rename(columns=renames)[columns]
+  agg =  df.groupby(['Centre financier', 'EJ', 'Année']).sum().reset_index()
 
+  return agg[agg['AE'] != 0]
 
 def test(folder):
   now = datetime.datetime.now()
   timestamp = now.isoformat().replace(':','-').replace('.', '-')
 
-  df = infbud(groupfiles.infbud(folder))
-  print(df)
+  outpath = 'files/infbud-' + timestamp + '.csv'
+  raw = groupfiles.infbud(folder)
+  raw.to_csv(outpath, index=False, decimal=",", sep=";")
 
-  outpath = 'infbud-' + timestamp + '.csv'
-  print(outpath)
-  df.to_pickle(outpath + '.pickle')
-  df.to_csv(outpath, index=False, decimal=",", sep=";")
+  df_ae = infbud_ae(raw)
+  print(df_ae)
 
-
-def testPickle():
-  filename = 'infbud-2019-04-04T18-55-56-474549.csv.pickle'
-
-  now = datetime.datetime.now()
-  timestamp = now.isoformat().replace(':','-').replace('.', '-')
-
-  df = pd.read_pickle(filename)
-  import numpy as np
-
-  df['Date comptable du SF'].mask(df['Date comptable du SF'] == '#', np.nan, inplace=True)
-  summary = infbud(df)
-  print(summary)
-
-  outpath = 'infbud-' + timestamp + '.csv'
-  print(outpath)
-  summary.to_pickle(outpath + '.pickle')
-  summary.to_csv(outpath, index=False, decimal=",", sep=";")
-
-  
+  outpath = 'files/infbud-ae-' + timestamp + '.csv'
+  df_ae.to_pickle(outpath + '.pickle')
+  df_ae.to_csv(outpath, index=False, decimal=",", sep=";")
 
 
 if __name__ == "__main__":

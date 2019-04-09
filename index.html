@@ -40,7 +40,9 @@ var margin = {
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  var data = [
+  var data = [{
+    name: 'Euros décaissés',
+    points: [
     { name: "Le client exprime un besoin" },
     { name: "Le fournisseur envoie un devis" },
     { name: "Le client accepte le devis en émettant un bon de commande" },
@@ -49,6 +51,7 @@ var margin = {
     { name: "Le fournisseur livre la commande complètement avec une facture de clôture", value: 0.5 },
     { name: "À 30 jours, le client paie la facture finale", value: 1 },
     { name: "Tout le monde est content", value: 1 },
+  ]}
   ]
 
 function wrap(text, width) {
@@ -87,8 +90,8 @@ function wrap(text, width) {
       .attr("transform", "translate(0," + height + ")");
 
 
-  x.range([0, width / 8 * data.length])
-  x.domain(data.map(function(d) { return d.name; }));
+  x.range([0, width / 8 * data[0].points.length])
+  x.domain(data[0].points.map(function(d) { return d.name; }));
   xAxisGroup.call(xAxis);
 
   xAxisGroup.selectAll(".tick text")
@@ -115,14 +118,33 @@ function wrap(text, width) {
 
   var colors = d3.scaleOrdinal(d3.schemeCategory10);
 
-  var steps = svg.append("g").selectAll('path').data([data]);
-  steps.enter()
+  var steps = svg.append("g").selectAll('path').data(data, function(d) { return d.name; });
+  steps
+      .enter()
+      .datum(function(d) { return d.points; })
       .append('path')
       .attr('d', line)
       .style('stroke-width', 3)
       .style('stroke', function(d, i) { return colors(i); });
 
-  steps.attr('d', line)
+  var legend = svg.append("g")
+    .attr("transform", "translate(10," + 10 + ")")
+
+  var items = legend.selectAll("g").data(data).enter()
+      .append("g")
+
+
+    items.append("rect")
+      .attr("x", 10)
+      .attr("y", 10)
+      .attr("width", 10)
+      .attr("height", 10)
+      .style('fill', function(d, i) { return colors(i); });
+
+    items.append("text")
+      .attr("x", 30)
+      .attr("y", 20)
+      .text(function(d) { return d.name; })
 
 
 

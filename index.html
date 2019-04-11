@@ -5,8 +5,6 @@
     <style type="text/css">
       svg {
         background-color: lightgrey;
-        height: 400px;
-        width: 80%;
       }
 
       path {
@@ -17,32 +15,117 @@
     </style>
   </head>
   <body>
-    <h1>Hello</h1>
-
     <script src="d3.js" type="text/javascript"></script>
-    <svg id="infographie">
-    </svg>
+    <svg id="chart1"></svg>
+    <svg id="chart2"></svg>
+    <svg id="chart3"></svg>
 
     <script type="text/javascript">
-
 var height = 300;
 var width = 1200;
 var margin = {
-  top: 40,
-  bottom: 40,
+  top: 50,
+  bottom: 70,
   left: 40,
   right: 40,
 }
-    
-  var svg = d3.select('#infographie')
-  .attr("width", width + margin.left + margin.right)
-  .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  var data = [{
-    name: 'Euros décaissés',
-    points: [
+function chart(document, data, title, colorOffset) {
+  colorOffset = colorOffset || 0;
+  var svg = document
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  var x = d3.scaleBand([0, 800])
+    .padding(0.1);
+
+  var xAxis = d3.axisBottom()
+    .scale(x);
+
+  var xAxisGroup = svg.append("g")
+    .attr("class", "x axis")
+    .attr("transform", "translate(0," + height + ")");
+
+  x.range([0, width])
+  x.domain(data[0].points.map(function(d) { return d.name; }));
+  xAxisGroup.call(xAxis);
+
+  xAxisGroup.selectAll(".tick text")
+    .call(wrap, x.step());
+
+  var y = d3.scaleLinear()
+    .range([height, 0]);
+  y.domain([0, 1]);
+
+  var title = svg.append("text")
+    .attr("class", "title")
+    .attr("y", -20)
+    .attr("x", 20)
+    .text(title);
+
+  var yAxis = d3.axisLeft()
+    .scale(y)
+    .ticks(3);
+
+  var yAxisGroup = svg.append("g")
+    .attr("class", "y axis");
+
+  yAxisGroup.call(yAxis);
+
+  var line = d3.line()
+    .x(function(d, i) { return x(d.name) + x.step()*0.45; })
+    .y(function(d, i) { return y(d.value || 0); })
+    .curve(d3.curveStepAfter);
+
+  var colors = d3.scaleOrdinal(d3.schemeCategory10).domain([0,1,2,3]);
+
+  var steps = svg.append("g").selectAll('path').data(data, function(d) { return d.name; });
+  steps
+    .enter()
+    .datum(function(d) { return d.points; })
+    .append('path')
+    .attr('d', line)
+    .style('stroke-width', 3)
+    .style('stroke', function(d, i) { return colors(i + colorOffset); });
+
+  var legend = svg.append("g")
+    .attr("transform", "translate(10, 0)")
+
+  var items = legend.selectAll("g").data(data).enter()
+    .append("g")
+    .attr("transform", function(d, i) { return "translate(10," + i*20 + ")"; })
+
+  items.append("rect")
+    .attr("x", 10)
+    .attr("y", 10)
+    .attr("width", 10)
+    .attr("height", 10)
+    .style('fill', function(d, i) { return colors(i + colorOffset); });
+
+  items.append("text")
+    .attr("x", 30)
+    .attr("y", 20)
+    .text(function(d) { return d.name; })
+
+  return chart;
+}
+
+var achatClassique = [{
+  name: 'Euros engagés',
+  points: [
+    { name: "Le client exprime un besoin" },
+    { name: "Le fournisseur envoie un devis" },
+    { name: "Le client accepte le devis en émettant un bon de commande", value: 1 },
+    { name: "Le fournisseur livre partiellement la commande avec une facture", value: 1 },
+    { name: "À 30 jours, le client paie la facture", value: 1 },
+    { name: "Le fournisseur livre la commande complètement avec une facture de clôture", value: 1 },
+    { name: "À 30 jours, le client paie la facture finale", value: 1 },
+    { name: "Tout le monde est content", value: 1 },
+  ]},{
+  name: 'Euros décaissés',
+  points: [
     { name: "Le client exprime un besoin" },
     { name: "Le fournisseur envoie un devis" },
     { name: "Le client accepte le devis en émettant un bon de commande" },
@@ -51,20 +134,53 @@ var margin = {
     { name: "Le fournisseur livre la commande complètement avec une facture de clôture", value: 0.5 },
     { name: "À 30 jours, le client paie la facture finale", value: 1 },
     { name: "Tout le monde est content", value: 1 },
+  ]},
+]
+
+chart(d3.select('#chart1'), achatClassique.slice(1), 'Achat classique dans le privé', 1)
+chart(d3.select('#chart2'), achatClassique, 'Achat classique dans le privé en prenant en compte les engagements')
+chart(d3.select('#chart3'), [{
+  name: "Autorisations d'engagement (AE)",
+  points: [
+    { name: "Un service de l'État exprime son besoin à son fournisseur" },
+    { name: "Le fournisseur lui transmet un devis" },
+    { name: "le service de l'État transmet une demande d'achat à ses gestionnaires" },
+    { name: "Cette demande d'achat est instruite et génère un bon de commande transmis au fournisseur", value: 1 },
+    { name: "Le fournisseur livre partiellement la commande avec une facture", value: 1 },
+    { name: "Le service de l'État établi un procès verbal de service fait", value: 1 },
+    { name: "À 30 jours, le client paie la facture", value: 1 },
+    { name: "Le fournisseur livre la commande complètement avec une facture de clôture", value: 1 },
+    { name: "Le service de l'État établi un procès verbal de service fait final", value: 1 },
+    { name: "À 30 jours, le client paie la facture finale", value: 1 },
+    { name: "Tout le monde est content", value: 1 },
+  ]},{
+  name: 'Crédits de paiement (CP)',
+  points: [
+    { name: "Un service de l'État exprime son besoin à son fournisseur" },
+    { name: "Le fournisseur lui transmet un devis" },
+    { name: "le service de l'État transmet une demande d'achat à ses gestionnaires" },
+    { name: "Cette demande d'achat est instruite et génère un bon de commande transmis au fournisseur", value: 0 },
+    { name: "Le fournisseur livre partiellement la commande avec une facture", value: 0 },
+    { name: "Le service de l'État établi un procès verbal de service fait", value: 0 },
+    { name: "À 30 jours, le client paie la facture", value: 0.5 },
+    { name: "Le fournisseur livre la commande complètement avec une facture de clôture", value: 0.5 },
+    { name: "Le service de l'État établi un procès verbal de service fait final", value: 0.5 },
+    { name: "À 30 jours, le client paie la facture finale", value: 1 },
+    { name: "Tout le monde est content", value: 1 },
   ]}
-  ]
+], 'Achat dans l’État')
 
 function wrap(text, width) {
   text.each(function() {
     var text = d3.select(this),
-        words = text.text().split(/\s+/).reverse(),
-        word,
-        line = [],
-        lineNumber = 0,
-        lineHeight = 1.1, // ems
-        y = text.attr("y"),
-        dy = parseFloat(text.attr("dy")),
-        tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+      words = text.text().split(/\s+/).reverse(),
+      word,
+      line = [],
+      lineNumber = 0,
+      lineHeight = 1.1, // ems
+      y = text.attr("y"),
+      dy = parseFloat(text.attr("dy")),
+      tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
     while (word = words.pop()) {
       line.push(word);
       tspan.text(line.join(" "));
@@ -77,76 +193,6 @@ function wrap(text, width) {
     }
   });
 }
-
-  var x = d3.scaleBand([0, 800])
-      .padding(0.1);
-
-  var xAxis = d3.axisBottom()
-      .scale(x);
-
-
-  var xAxisGroup = svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + height + ")");
-
-
-  x.range([0, width / 8 * data[0].points.length])
-  x.domain(data[0].points.map(function(d) { return d.name; }));
-  xAxisGroup.call(xAxis);
-
-  xAxisGroup.selectAll(".tick text")
-      .call(wrap, x.step());
-
-  var y = d3.scaleLinear()
-      .range([300, 0]);
-  y.domain([0, 1]);
-
-
-  var yAxis = d3.axisLeft()
-      .scale(y)
-      .ticks(3);
-
-  var yAxisGroup = svg.append("g")
-      .attr("class", "y axis");
-
-  yAxisGroup.call(yAxis);
-
-  var line = d3.line()
-      .x(function(d, i) { return x(d.name); })
-      .y(function(d, i) { return y(d.value || 0); })
-      .curve(d3.curveStepAfter);
-
-  var colors = d3.scaleOrdinal(d3.schemeCategory10);
-
-  var steps = svg.append("g").selectAll('path').data(data, function(d) { return d.name; });
-  steps
-      .enter()
-      .datum(function(d) { return d.points; })
-      .append('path')
-      .attr('d', line)
-      .style('stroke-width', 3)
-      .style('stroke', function(d, i) { return colors(i); });
-
-  var legend = svg.append("g")
-    .attr("transform", "translate(10," + 10 + ")")
-
-  var items = legend.selectAll("g").data(data).enter()
-      .append("g")
-
-
-    items.append("rect")
-      .attr("x", 10)
-      .attr("y", 10)
-      .attr("width", 10)
-      .attr("height", 10)
-      .style('fill', function(d, i) { return colors(i); });
-
-    items.append("text")
-      .attr("x", 30)
-      .attr("y", 20)
-      .text(function(d) { return d.name; })
-
-
 
     </script>    
   </body>

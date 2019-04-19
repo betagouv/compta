@@ -9,6 +9,14 @@ import groupfiles
 import processfiles
 import onlinesheet
 
+
+import argparse
+
+parser = argparse.ArgumentParser(description='Consolide les informations Chorus et Incubateur.')
+parser.add_argument('source', help='dossier contenant les restitutions Chorus INF_BUD_53 à utiliser')
+parser.add_argument('--output', default='files/', help='dossier dans lequel les fichiers seront générés (valeur par défaut "files/")')
+parser.add_argument('--format', default='csv', help='format des fichiers à générer (csv (valeur par défaut) ou excel)')
+
 exports = {
   'csv': {
     'path': lambda prefix, timestamp, root='': root + prefix + '-' + timestamp + '.csv',
@@ -20,7 +28,7 @@ exports = {
   },
 }
 
-def main(folder):
+def main(folder, root, out_format):
   now = datetime.datetime.now()
   timestamp = now.isoformat().replace(':','-').replace('.', '-')
 
@@ -30,9 +38,6 @@ def main(folder):
   compta = onlinesheet.aggregateEJ(gs)
 
   agg = pd.merge(ej, compta, how='outer', left_on='EJ', right_on='Numéro de BdC')
-
-  out_format = 'excel'
-  root = 'files/'
 
   agg_outpath = exports[out_format]['path']('sanity-check', timestamp, root)
   exports[out_format]['save'](agg, agg_outpath)
@@ -44,4 +49,5 @@ def main(folder):
 
 
 if __name__ == "__main__":
-  main(sys.argv[1])
+  args = parser.parse_args()
+  main(args.source, args.output, args.format)

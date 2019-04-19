@@ -50,4 +50,6 @@ def main(folder, root, out_format):
 
 if __name__ == "__main__":
   args = parser.parse_args()
-  main(args.source, args.output, args.format)
+
+  output = args.output if (not os.path.isdir(args.output)) or args.output[-1] == '/' else (args.output + '/')
+  main(args.source, output, args.format)

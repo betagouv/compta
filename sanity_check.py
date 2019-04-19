@@ -9,7 +9,18 @@ import groupfiles
 import processfiles
 import onlinesheet
 
-def test(folder):
+exports = {
+  'csv': {
+    'path': lambda prefix, timestamp, root='': root + prefix + '-' + timestamp + '.csv',
+    'save': lambda df, path: df.to_csv(path, index=False, decimal=",", sep=";")
+  },
+  'excel': {
+    'path': lambda prefix, timestamp, root='': root + prefix + '-' + timestamp + '.xlsx',
+    'save': lambda df, path: df.to_excel(path, index=False, sheet_name='Data')
+  },
+}
+
+def main(folder):
   now = datetime.datetime.now()
   timestamp = now.isoformat().replace(':','-').replace('.', '-')
 
@@ -20,14 +31,17 @@ def test(folder):
 
   agg = pd.merge(ej, compta, how='outer', left_on='EJ', right_on='Numéro de BdC')
 
-  agg_outpath = 'files/sanity-check-' + timestamp + '.csv'
-  agg.to_csv(agg_outpath, index=False, decimal=",", sep=";")
+  out_format = 'excel'
+  root = 'files/'
 
-  ej_outpath = 'files/ej-' + timestamp + '.csv'
-  ej.to_csv(ej_outpath, index=False, decimal=",", sep=";")
+  agg_outpath = exports[out_format]['path']('sanity-check', timestamp, root)
+  exports[out_format]['save'](agg, agg_outpath)
+
+  ej_outpath = exports[out_format]['path']('ej', timestamp, root)
+  exports[out_format]['save'](ej, ej_outpath)
+
   return ej, compta, agg
 
 
 if __name__ == "__main__":
-  test(sys.argv[1])
-  print('All good! Keep dreaming.')
+  main(sys.argv[1])

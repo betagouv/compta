@@ -33,7 +33,8 @@ def main(folder, root, out_format):
   timestamp = now.isoformat().replace(':','-').replace('.', '-')
 
   raw = groupfiles.infbud(folder)
-  ej = processfiles.infbud_ae(raw)
+  ej_base = processfiles.infbud_ae(raw)
+  ej = ej_base.groupby(['EJ']).sum().reset_index()
   gs = onlinesheet.getdata()
   compta = onlinesheet.aggregateEJ(gs)
 

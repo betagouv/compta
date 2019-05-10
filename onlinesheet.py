@@ -83,7 +83,9 @@ def getdata():
     sheet = service.spreadsheets()
     data = getrange(sheet, SHEET)
     df = pd.DataFrame(data[1:len(data)], columns=data[0])
-    df['Numéro de BdC'] = df['Numéro de BdC'].mask(df['Numéro de BdC'] == "", 0).astype('int64')
+
+    df['Numéro de BdC'] = pd.to_numeric(df['Numéro de BdC'], 'coerce', 'integer').fillna(0)
+    df['Montant TTC'] = pd.to_numeric(df['Montant TTC'], 'coerce', 'integer').fillna(0)
 
     return df
 

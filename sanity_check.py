@@ -9,7 +9,6 @@ import groupfiles
 import processfiles
 import onlinesheet
 
-
 import argparse
 
 parser = argparse.ArgumentParser(description='Consolide les informations Chorus et Incubateur.')
@@ -54,7 +53,7 @@ def main(folder, root, out_format):
   agg_ej_cf = pd.merge(
     ej_base[['Centre financier', 'EJ', 'AE']].groupby(['Centre financier', 'EJ']).sum().reset_index(),
     gs[['Centre financier', 'Numéro de BdC', 'Montant TTC']].groupby(['Centre financier', 'Numéro de BdC']).sum().reset_index(),
-    how='outer', left_on=['EJ', 'Centre financier'], right_on=['Numéro de BdC', 'Centre financier'])
+    how='outer', left_on=['EJ'], right_on=['Numéro de BdC'])
   agg_ej_cf_outpath = exports[out_format]['path']('ej_cf', timestamp, root)
   exports[out_format]['save'](agg_ej_cf, agg_ej_cf_outpath)
 

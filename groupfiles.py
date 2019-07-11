@@ -60,15 +60,7 @@ def clean(df):
 def filter(df):
   df['EJ'] = df['EJ'].mask((df['EJ'] == "#") | df['EJ'].isna(), 0).astype('int64')
 
-  idx = df['Centre financier'].notna() & (
-    (df['Libellé centre de coûts'] == 'DINSIC INCUB') |
-    (
-      (df['Centre financier'] != 'BG00/0129-CAHC-DISI') &
-      (df['Centre financier'] != 'BG00/0129-CAHC-DRIE') &
-      (df['Centre financier'] != 'BG00/0129-CAHC-TRAN') &
-      (df['Centre financier'] != 'BG00/0129-CAHC-VTAM')
-)
-  )
+  idx = df['Centre financier'].notna()
   return df[idx]
 
 

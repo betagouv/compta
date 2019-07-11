@@ -9,7 +9,6 @@ import groupfiles
 import processfiles
 import onlinesheet
 
-
 import argparse
 
 parser = argparse.ArgumentParser(description='Consolide les informations Chorus et Incubateur.')
@@ -33,19 +32,32 @@ def main(folder, root, out_format):
   timestamp = now.isoformat().replace(':','-').replace('.', '-')
 
   raw = groupfiles.infbud(folder)
-  ej = processfiles.infbud_ae(raw)
+  ej_base = processfiles.infbud_ae(raw)
+  ej_outpath = exports[out_format]['path']('ej', timestamp, root)
+  exports[out_format]['save'](ej_base, ej_outpath)
+
+
   gs = onlinesheet.getdata()
+  gs_outpath = exports[out_format]['path']('gs', timestamp, root)
+  exports[out_format]['save'](gs, gs_outpath)
+
   compta = onlinesheet.aggregateEJ(gs)
 
-  agg = pd.merge(ej, compta, how='outer', left_on='EJ', right_on='Numéro de BdC')
+  ej = ej_base[['EJ', 'AE']].groupby(['EJ']).sum().reset_index()
+  agg_ej = pd.merge(ej, compta, how='outer', left_on='EJ', right_on='Numéro de BdC')
+  agg_ej = agg_ej[ agg_ej.EJ.isna() | (agg_ej['Montant TTC'].notna() & (agg_ej.AE != agg_ej['Montant TTC'])) ]
 
   agg_outpath = exports[out_format]['path']('sanity-check', timestamp, root)
-  exports[out_format]['save'](agg, agg_outpath)
+  exports[out_format]['save'](agg_ej, agg_outpath)
 
-  ej_outpath = exports[out_format]['path']('ej', timestamp, root)
-  exports[out_format]['save'](ej, ej_outpath)
+  agg_ej_cf = pd.merge(
+    ej_base[['Centre financier', 'EJ', 'AE']].groupby(['Centre financier', 'EJ']).sum().reset_index(),
+    gs[['Centre financier', 'Numéro de BdC', 'Montant TTC']].groupby(['Centre financier', 'Numéro de BdC']).sum().reset_index(),
+    how='outer', left_on=['EJ'], right_on=['Numéro de BdC'])
+  agg_ej_cf_outpath = exports[out_format]['path']('ej_cf', timestamp, root)
+  exports[out_format]['save'](agg_ej_cf, agg_ej_cf_outpath)
 
-  return ej, compta, agg
+  return ej_base, compta, agg_ej
 
 
 if __name__ == "__main__":

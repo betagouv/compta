@@ -39,16 +39,28 @@ def openfile(path):
 
   group = groupfiles.clean(groupfiles.rename(df))
   chorus = group[['EJ', 'Montant engagé']].groupby(['EJ']).sum().reset_index()
-  print(chorus)
 
-  gs = onlinesheet.getdata()
-  # gs.to_pickle('onlinesheet.getdata.pickle')
-  #gs = pd.read_pickle('onlinesheet.getdata.pickle')
+  gs = None
+  if False:
+    gs = onlinesheet.getdata()
+    gs.to_pickle('onlinesheet.getdata.pickle')
+  else:
+    gs = pd.read_pickle('onlinesheet.getdata.pickle')
   suivi  = gs[['Numéro de BdC', 'Montant TTC']].groupby(['Numéro de BdC']).sum().reset_index()
 
   join = pd.merge(chorus, suivi, how='outer', left_on='EJ', right_on='Numéro de BdC')
-  join.EJ = join.EJ.astype('S')
-  print(join[join['Numéro de BdC'].isna()])
+
+  w1 = join[join['Numéro de BdC'].isna()]
+  w1.EJ = w1.EJ.astype('S')
+  print('')
+  print('EJ inconnus dans le fichier de suivi')
+  print(w1)
+
+  w2 = join[join.EJ.notna() & join['Numéro de BdC'].notna() & (join['Montant engagé'] != join['Montant TTC'])]
+  w2.EJ = w2.EJ.astype('S')
+  print('')
+  print("EJ avec des montants incohérents (suivi versus Chorus)")
+  print(w2)
 
 
 if __name__ == "__main__":
@@ -56,4 +68,3 @@ if __name__ == "__main__":
     raise ValueError('Un chemin doit être passé en paramètre.')
 
   openfile(sys.argv[1])
-  print('All good! Keep dreaming.')

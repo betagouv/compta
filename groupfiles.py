@@ -32,8 +32,12 @@ def getprops(filename):
   comps = filename.split('.')[0].split(' ');
   return comps[0], comps[1], int(comps[2])
 
+
+def rename(df):
+  return df.rename(columns=renames)
+
 def openfile(path, filename):
-  df = pd.read_excel(path, skiprows=2).rename(columns=renames)
+  df = pd.read_excel(path, skiprows=2)
 
   _, group, year = getprops(filename)
   df['Groupe'] = group
@@ -47,14 +51,18 @@ def prepare(path, filename):
   return filter(clean(df))
 
 
-def clean(df):
-  df['EJ'] = df['EJ'].mask((df['EJ'] == "#") | df['EJ'].isna(), 0).astype('int64')
-
-  df['Date comptable du SF'] = pd.to_datetime(df['Date comptable du SF'], format='%Y-%m-%d', errors='coerce')
+def cleanAmountColumns(df):
   for amount in amountColumns:
     df[amount].fillna(0, inplace=True)
 
   return df
+
+
+def clean(df):
+  df['EJ'] = df['EJ'].mask((df['EJ'] == "#") | df['EJ'].isna(), 0).astype('int64')
+  df['Date comptable du SF'] = pd.to_datetime(df['Date comptable du SF'], format='%Y-%m-%d', errors='coerce')
+
+  return cleanAmountColumns(df)
 
 
 def filter(df):

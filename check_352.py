@@ -3,6 +3,10 @@ import datetime
 import sys
 import pandas as pd
 
+import groupfiles
+import onlinesheet
+
+
 names = [
   'Centre financier',
   'Centre financier 2',
@@ -32,8 +36,20 @@ names = [
 
 def openfile(path):
   df = pd.read_excel(path, skiprows=5, names=names)
-  
-  print(df)
+
+  group = groupfiles.clean(groupfiles.rename(df))
+  chorus = group[['EJ', 'Montant engagé']].groupby(['EJ']).sum().reset_index()
+  print(chorus)
+
+  gs = onlinesheet.getdata()
+  # gs.to_pickle('onlinesheet.getdata.pickle')
+  #gs = pd.read_pickle('onlinesheet.getdata.pickle')
+  suivi  = gs[['Numéro de BdC', 'Montant TTC']].groupby(['Numéro de BdC']).sum().reset_index()
+
+  join = pd.merge(chorus, suivi, how='outer', left_on='EJ', right_on='Numéro de BdC')
+  join.EJ = join.EJ.astype('S')
+  print(join[join['Numéro de BdC'].isna()])
+
 
 if __name__ == "__main__":
   if len(sys.argv) < 2:

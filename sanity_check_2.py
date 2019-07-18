@@ -52,7 +52,7 @@ names_dg = [
   'Compte budgétaire 2',
   'Référentiel de programmation',
   'Référentiel de programmation 2',
-  'Groupe de marchandises',
+  'Groupe de marchandises', 
   'Groupe de marchandises 2',
   'Date comptable du SF',
   'Bascule des EJ non soldés',
@@ -74,7 +74,7 @@ def openfile(path, names):
 def processdata(chorus):
 
   gs = None
-  if False:
+  if True:
     gs = onlinesheet.getdata()
     gs.to_pickle('onlinesheet.getdata.pickle')
   else:
@@ -100,6 +100,12 @@ if __name__ == "__main__":
   if len(sys.argv) < 2:
     raise ValueError('Un chemin doit être passé en paramètre.')
 
-  path = sys.argv[1]
-  df = openfile(path, names_352 if '352' in path else names_dg)
-  processdata(df)
+  paths = sys.argv[1:]
+  for path in paths:
+    print('')
+    print('')
+    print('')
+    print(path)
+    print('')
+    df = openfile(path, names_352 if '352' in path else names_dg)
+    processdata(df)

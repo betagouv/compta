@@ -15,6 +15,7 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
 # The ID and range of a sample spreadsheet.
 SAMPLE_SPREADSHEET_ID = '1pZYJvjUeMPF2oWzDOp6SC-CECcb3zmt5xq-udeEcELg'
+TEAM_SHEET = '\'Suivi par équipe\''
 SHEET = '\'Commandes réalisées par équipe\''
 
 
@@ -56,7 +57,7 @@ def aggregateEJ(data):
     return df.groupby('Numéro de BdC').sum().reset_index().rename(columns={'index': 'Numéro de BdC'})
 
 
-def getdata():
+def getsheet():
     """Shows basic usage of the Sheets API.
     Prints values from a sample spreadsheet.
     """
@@ -80,7 +81,15 @@ def getdata():
             pickle.dump(creds, token)
 
     service = build('sheets', 'v4', credentials=creds)
-    sheet = service.spreadsheets()
+    return service.spreadsheets()
+
+
+def getdata():
+    sheet = getsheet()
+
+    df['Numéro de BdC'] = pd.to_numeric(df['Numéro de BdC'], 'coerce', 'integer').fillna(0)
+    df['Montant TTC'] = pd.to_numeric(df['Montant TTC'], 'coerce', 'integer').fillna(0)
+
     data = getrange(sheet, SHEET)
     df = pd.DataFrame(data[1:len(data)], columns=data[0])
 
@@ -90,7 +99,15 @@ def getdata():
     return df
 
 
-def main():
+def getteamdata():
+    sheet = getsheet()
+    data = getrange(sheet, TEAM_SHEET)
+    df = pd.DataFrame(data[1:len(data)], columns=data[0])
+    df.ID = df.ID.fillna('')
+    return df
+
+
+def generateGSAggregate():
     df = getdata()
     agg = aggregateEJ(df)
 
@@ -99,6 +116,10 @@ def main():
 
     outpath = 'files/gs-' + timestamp + '.csv'
     agg.to_csv(outpath, index=False, decimal=",", sep=";")
+
+
+def main():
+    print(getteamdata())
 
 
 if __name__ == '__main__':

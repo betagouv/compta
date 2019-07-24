@@ -15,8 +15,9 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
 # The ID and range of a sample spreadsheet.
 SAMPLE_SPREADSHEET_ID = '1pZYJvjUeMPF2oWzDOp6SC-CECcb3zmt5xq-udeEcELg'
-TEAM_SHEET = '\'Suivi par équipe\''
-SHEET = '\'Commandes réalisées par équipe\''
+TEAM_SHEET = 'Suivi par équipe'
+CONVENTION_SHEET = 'Conventions'
+ORDER_SHEET = 'Commandes réalisées par équipe'
 
 
 def breakrange(rangestring):
@@ -26,12 +27,12 @@ def breakrange(rangestring):
 
 def getrange(sheet, name):
     row_result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
-                                range=name + '!A:A',
+                                range='\'' + name + '\'!A:A',
                                 valueRenderOption='UNFORMATTED_VALUE').execute()
     row_values = row_result.get('range', [])
 
     column_result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
-                                range=name + '!1:1',
+                                range='\'' + name + '\'!1:1',
                                 valueRenderOption='UNFORMATTED_VALUE').execute()
     column_values = column_result.get('range', [])
 
@@ -84,26 +85,30 @@ def getsheet():
     return service.spreadsheets()
 
 
-def getdata():
-    sheet = getsheet()
-
-    df['Numéro de BdC'] = pd.to_numeric(df['Numéro de BdC'], 'coerce', 'integer').fillna(0)
-    df['Montant TTC'] = pd.to_numeric(df['Montant TTC'], 'coerce', 'integer').fillna(0)
-
-    data = getrange(sheet, SHEET)
-    df = pd.DataFrame(data[1:len(data)], columns=data[0])
-
-    df['Numéro de BdC'] = pd.to_numeric(df['Numéro de BdC'], 'coerce', 'integer').fillna(0)
-    df['Montant TTC'] = pd.to_numeric(df['Montant TTC'], 'coerce', 'integer').fillna(0)
-
-    return df
-
-
 def getteamdata():
     sheet = getsheet()
     data = getrange(sheet, TEAM_SHEET)
     df = pd.DataFrame(data[1:len(data)], columns=data[0])
     df.ID = df.ID.fillna('')
+    return df
+
+
+def getconventiondata():
+    sheet = getsheet()
+    data = getrange(sheet, CONVENTION_SHEET)
+    df = pd.DataFrame(data[1:len(data)], columns=data[0])
+    return df
+
+
+def getorderdata():
+    sheet = getsheet()
+
+    data = getrange(sheet, ORDER_SHEET)
+    df = pd.DataFrame(data[1:len(data)], columns=data[0])
+
+    df['Numéro de BdC'] = pd.to_numeric(df['Numéro de BdC'], 'coerce', 'integer').fillna(0)
+    df['Montant TTC'] = pd.to_numeric(df['Montant TTC'], 'coerce', 'integer').fillna(0)
+
     return df
 
 
@@ -118,8 +123,28 @@ def generateGSAggregate():
     agg.to_csv(outpath, index=False, decimal=",", sep=";")
 
 
+def sanitycheck():
+    team = getteamdata()
+    convention = getconventiondata()
+    order = getorderdata()
+    team.to_pickle('onlinesheet.team.pickle')
+    convention.to_pickle('onlinesheet.convention.pickle')
+    order.to_pickle('onlinesheet.order.pickle')
+
+    team = pd.read_pickle('onlinesheet.team.pickle')
+    convention = pd.read_pickle('onlinesheet.convention.pickle')
+    order = pd.read_pickle('onlinesheet.order.pickle')
+
+    convention_left = convention.merge(team, on='Équipe', how='left', indicator='indicator')
+    print(convention_left[convention_left.indicator.str.contains('left_only')])
+
+    keys = ['Équipe', 'Référence convention']
+    order_left = order[keys + ['Montant TTC']].groupby(keys).count().reset_index().merge(convention, on=keys, how='left', indicator='indicator')
+    print(order_left[order_left.indicator.str.contains('left_only')])
+
+
 def main():
-    print(getteamdata())
+    sanitycheck()
 
 
 if __name__ == '__main__':

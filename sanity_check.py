@@ -37,7 +37,7 @@ def main(folder, root, out_format):
   exports[out_format]['save'](ej_base, ej_outpath)
 
 
-  gs = onlinesheet.getdata()
+  gs = onlinesheet.getorderdata()
   gs_outpath = exports[out_format]['path']('gs', timestamp, root)
   exports[out_format]['save'](gs, gs_outpath)
 

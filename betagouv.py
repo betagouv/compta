@@ -24,7 +24,7 @@ def main():
   t = utils.explode(t, ['ID'])
 
 
-  agg = d[~(d.status.str.contains('death') | d.id.str.contains('open-academie') | d.id.str.contains('signaux-faibles'))].merge(t, how='left', left_on='id', right_on='ID') 
+  agg = d[~(d.status.str.contains('death') | d.id.str.contains('signaux-faibles'))].merge(t, how='left', left_on='id', right_on='ID')
   v = agg[agg.ID.isna()]
   v.to_csv('test.csv', index=False, decimal=",", sep=";")
   print(v)

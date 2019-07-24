@@ -75,7 +75,7 @@ def processdata(chorus):
 
   gs = None
   if True:
-    gs = onlinesheet.getdata()
+    gs = onlinesheet.getorderdata()
     gs.to_pickle('onlinesheet.getdata.pickle')
   else:
     gs = pd.read_pickle('onlinesheet.getdata.pickle')

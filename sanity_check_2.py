@@ -3,76 +3,25 @@ import datetime
 import sys
 import pandas as pd
 
+import config
 import groupfiles
 import onlinesheet
 
+pd.options.display.float_format = '{:.0f}'.format
 
-names_352 = [
-  'Centre financier',
-  'Centre financier 2',
-  'N° EJ',
-  'Type de flux',
-  'Fournisseur titulaire principal (EJ)',
-  'N° de contrat',
-  'N° poste EJ',
-  'Centre de coûts',
-  'Centre de coûts 2',
-  'Fonds',
-  'Fonds 2',
-  'Compte budgétaire',
-  'Compte budgétaire 2',
-  'Référentiel de programmation',
-  'Référentiel de programmation 2',
-  'Groupe de marchandises',
-  'Groupe de marchandises 2',
-  'Date comptable du SF',
-  'Bascule des EJ non soldés',
-  'Montant engagé',
-  'Montant certifié non soldé',
-  'Montant pré-enregistré',
-  'Montant facturé',
-  'Montant payé',
-]
-
-names_dg = [
-  'Service exécutant',
-  'Service exécutant 2',
-  'Centre financier',
-  'Centre financier 2',
-  'N° EJ',
-  'Type de flux',
-  'Fournisseur titulaire principal (EJ)',
-  'N° de contrat',
-  'N° poste EJ',
-  'Centre de coûts',
-  'Centre de coûts 2',
-  'Fonds',
-  'Fonds 2',
-  'Compte budgétaire',
-  'Compte budgétaire 2',
-  'Référentiel de programmation',
-  'Référentiel de programmation 2',
-  'Groupe de marchandises', 
-  'Groupe de marchandises 2',
-  'Date comptable du SF',
-  'Bascule des EJ non soldés',
-  'Montant engagé',
-  'Montant certifié non soldé',
-  'Montant pré-enregistré',
-  'Montant facturé',
-  'Montant payé',
-]
-
-
-def openfile(path, names):
-  df = pd.read_excel(path, skiprows=5, names=names)
+def openfile(path, params):
+  df = pd.read_excel(path, skiprows=params['skiprows'], names=params['columns'], na_values=["#"])
 
   group = groupfiles.clean(groupfiles.rename(df))
-  return group[['EJ', 'Montant engagé']].groupby(['EJ']).sum().reset_index()
+  filtered = group[~group.EJ.isin(params['exclusions'])]
+  summed = filtered[['EJ', 'Montant engagé', 'Bascule des EJ non soldés']].groupby(['EJ']).sum().reset_index()
+
+  # Seules les commandes de cette année sont prises en compte
+  # Les EJ avec des bascules sont des commandes des années précédentes
+  return summed[summed['Bascule des EJ non soldés'] == 0].copy()
 
 
 def processdata(chorus):
-
   gs = None
   if True:
     gs = onlinesheet.getorderdata()
@@ -84,13 +33,11 @@ def processdata(chorus):
   join = pd.merge(chorus, suivi, how='outer', left_on='EJ', right_on='Numéro de BdC')
 
   w1 = join[join['Numéro de BdC'].isna()]
-  w1.EJ = w1.EJ.astype('S')
   print('')
   print('EJ inconnus dans le fichier de suivi')
   print(w1)
 
   w2 = join[join.EJ.notna() & join['Numéro de BdC'].notna() & (join['Montant engagé'] != join['Montant TTC'])]
-  w2.EJ = w2.EJ.astype('S')
   print('')
   print("EJ avec des montants incohérents (suivi versus Chorus)")
   print(w2)
@@ -107,5 +54,5 @@ if __name__ == "__main__":
     print('')
     print(path)
     print('')
-    df = openfile(path, names_352 if '352' in path else names_dg)
+    df = openfile(path, config.configs['P352'] if '352' in path else config.configs['DG'])
     processdata(df)

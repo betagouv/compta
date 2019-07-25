@@ -54,21 +54,16 @@ def prepare(path, filename):
 def cleanAmountColumns(df):
   for amount in amountColumns:
     df[amount].fillna(0, inplace=True)
-
   return df
 
 
 def clean(df):
-  df['EJ'] = df['EJ'].mask((df['EJ'] == "#") | df['EJ'].isna(), 0).astype('int64')
   df['Date comptable du SF'] = pd.to_datetime(df['Date comptable du SF'], format='%Y-%m-%d', errors='coerce')
-
   return cleanAmountColumns(df)
 
 
 def filter(df):
-  df['EJ'] = df['EJ'].mask((df['EJ'] == "#") | df['EJ'].isna(), 0).astype('int64')
-
-  idx = df['Centre financier'].notna()
+  idx = df['Centre financier'].notna() & df['EJ'].notna()
   return df[idx]
 
 

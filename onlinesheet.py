@@ -124,12 +124,12 @@ def generateGSAggregate():
 
 
 def sanitycheck():
-    team = getteamdata()
-    convention = getconventiondata()
-    order = getorderdata()
-    team.to_pickle('onlinesheet.team.pickle')
-    convention.to_pickle('onlinesheet.convention.pickle')
-    order.to_pickle('onlinesheet.order.pickle')
+    # team = getteamdata()
+    # convention = getconventiondata()
+    # order = getorderdata()
+    # team.to_pickle('onlinesheet.team.pickle')
+    # convention.to_pickle('onlinesheet.convention.pickle')
+    # order.to_pickle('onlinesheet.order.pickle')
 
     team = pd.read_pickle('onlinesheet.team.pickle')
     convention = pd.read_pickle('onlinesheet.convention.pickle')

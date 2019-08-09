@@ -2,7 +2,7 @@
 
 cd front
 npm ci
-${NVM_BIN}/pm2 reload compta
+npm run reload
 
 cd ../back
 source .venv/bin/activate

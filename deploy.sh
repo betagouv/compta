@@ -1,5 +1,7 @@
 #!/bin/bash
 
+git pull
+
 cd front
 npm ci
 npm run reload

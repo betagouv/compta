@@ -13,6 +13,13 @@ app.prepare().then(() => {
     server.use(compression())
   }
 
+  server.get('/startup/:startupId', (req, res) => {
+    app.render(req, res, '/startup', {
+      ...req.query,
+      startupId: req.params.startupId
+    })
+  })
+
   server.get('*', (req, res) => {
     app.render(req, res, req.params[0], req.query)
   })

@@ -26,5 +26,6 @@ cd back
 virtualenv .venv --python=python3.6
 source .venv/bin/activate
 pip install --requirement requirements.txt --upgrade
-GOOGLE_API_KEY=VOTRE-CLE-API-GOOGLE FLASK_DEBUG=1 FLASK_APP=app.py flask run
+GOOGLE_API_KEY=VOTRE-CLE-API-GOOGLE gunicorn app:app
+python -mwebbrowser http://localhost:8000/
 ```

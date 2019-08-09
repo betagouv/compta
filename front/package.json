@@ -6,7 +6,7 @@
     "build": "NODE_ENV=production next build && NODE_ENV=production next export",
     "deploy": "npm run build && npm run deploy:github",
     "deploy:github": "touch out/.nojekyll && gh-pages -d out --dotfiles",
-    "dev": "next",
+    "dev": "node server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,6 +20,8 @@
   "homepage": "https://github.com/betagouv/compta#readme",
   "dependencies": {
     "@zeit/next-css": "^1.0.1",
+    "compression": "^1.7.4",
+    "express": "^4.17.1",
     "isomorphic-unfetch": "^2.0.0",
     "next": "^8.1.0",
     "next-images": "^0.10.6",

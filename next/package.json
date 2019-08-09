@@ -1,0 +1,34 @@
+{
+  "name": "compta",
+  "version": "0.1.0",
+  "description": "A basic tool to view beta.gouv.fr product finances",
+  "scripts": {
+    "build": "NODE_ENV=production next build && NODE_ENV=production next export",
+    "deploy": "npm run build && npm run deploy:github",
+    "deploy:github": "touch out/.nojekyll && gh-pages -d out --dotfiles",
+    "dev": "next",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/betagouv/compta.git"
+  },
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/betagouv/compta"
+  },
+  "homepage": "https://github.com/betagouv/compta#readme",
+  "dependencies": {
+    "@zeit/next-css": "^1.0.1",
+    "isomorphic-unfetch": "^2.0.0",
+    "next": "^8.1.0",
+    "next-images": "^0.10.6",
+    "react": "^16.3.2",
+    "react-dom": "^16.3.2",
+    "react-select": "^3.0.4",
+    "template.data.gouv.fr": "^1.2.1"
+  },
+  "devDependencies": {
+    "gh-pages": "^1.2.0"
+  }
+}

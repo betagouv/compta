@@ -142,6 +142,10 @@ def sanitycheck():
     order_left = order[keys + ['Montant TTC']].groupby(keys).count().reset_index().merge(convention, on=keys, how='left', indicator='indicator')
     print(order_left[order_left.indicator.str.contains('left_only')])
 
+    team.to_json('onlinesheet.team.json', orient="records")
+    convention.to_json('onlinesheet.convention.json', orient="records")
+    order.to_json('onlinesheet.order.json', orient="records")
+
 
 def main():
     sanitycheck()

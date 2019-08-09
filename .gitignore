@@ -1,6 +1,9 @@
 credentials.json
 *.csv
 *.ods
+.next
+node_modules
+out
 *.pickle
 __pycache__
 .venv

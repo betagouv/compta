@@ -131,8 +131,8 @@ export default function Index({allConventions, allOrders, startups, teams}) {
               <th>Montant TTC</th>
             </tr></thead>
             <tbody>
-            { orders.map(o => (
-              <tr>
+            { orders.map((o, i) => (
+              <tr key={i}>
                 <td>TBD</td>
                 <td>{o['Presta']}</td>
                 <td>{o['Réf devis']}</td>
@@ -183,5 +183,7 @@ Index.getInitialProps = async () => {
   const allOrders = await getOrders();
   const startups = await getStartups();
   const teams = await getTeams();
-  return { allConventions, allOrders, startups, teams };
+
+  const props = { allConventions, allOrders, startups, teams }
+  return props
 };

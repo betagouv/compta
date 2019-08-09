@@ -148,9 +148,6 @@ Index.getInitialProps = async ({startup}) => {
   const teams = await getTeams();
 
   const team = teams.find(t => t.ID.includes(startup.id))
-  console.log('teams', teams)
-  console.log('startup.id', startup.id)
-  console.log('team', team)
   const conventions = allConventions.filter(item => item['Équipe'] === team['Équipe'])
   const orders = allOrders.filter(item => item['Équipe'] === team['Équipe'])
   return {

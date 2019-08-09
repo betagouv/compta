@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Head from 'next/head'
 
-import templateStyle from 'template.data.gouv.fr/dist/test.css'
+import templateStyle from '../style/main.css'
 
 const Header = () => (
   <div>

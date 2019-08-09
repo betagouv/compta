@@ -1,0 +1,13 @@
+# /etc/systemd/system/api-compta.service
+[Unit]
+Description=Compta API Python service
+
+[Service]
+User=cloud
+Restart=always
+EnvironmentFile=/home/cloud/.secrets
+WorkingDirectory=/home/cloud/compta/back
+ExecStart=/home/cloud/compta/back/.venv/bin/gunicorn app:app
+
+[Install]
+WantedBy=multi-user.target

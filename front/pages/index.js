@@ -158,6 +158,7 @@ async function getStartups() {
   return json.data
 }
 
+const baseAPI = 'https://api.compta.beta.gouv.fr/api/'
 async function fetchAPI(id) {
   try {
     const res = await fetch(`${baseAPI}${id}`)
@@ -167,7 +168,6 @@ async function fetchAPI(id) {
   }
 }
 
-const baseAPI = 'http://127.0.0.1:8000/api/'
 async function getConventions() {
   return fetchAPI('conventions')
 }
@@ -177,7 +177,7 @@ async function getOrders() {
 }
 
 async function getTeams() {
-  const teams = await fetchAPI('conventions')
+  const teams = await fetchAPI('teams')
   teams.forEach(t => {
     t.ID = t.ID.split(',')
   })

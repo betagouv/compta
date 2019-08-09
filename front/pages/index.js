@@ -23,32 +23,14 @@ export default function Index({startups}) {
 
   return (
     <Layout>
-      <section className="section section-dark">
-        <div className="container">
-          <h2 className="section__title">Suivi financier des Startups d'État</h2>
-        </div>
-      </section>
-
-      <div id="dashboard" className="dashboard">
-        <aside className="side-menu" role="navigation">
-          <ul>
-            <li><a className="active">Suivi par équipe</a></li>
-            <li><a>Suivi global</a></li>
-          </ul>
-        </aside>
-        <div className="main">
-
-          <div className="panel">
-            <div className="panel__header">
-              <h3>Suivi par Startup d'État</h3>
-            </div>
-            <div className="form__group">
-              <StartupInput options={startupOptions} value={startup} onChange={handleStartupChange} />
-            </div>
-          </div>
-
-        </div>
+    <div className="panel">
+      <div className="panel__header">
+        <h3>Suivi par Startup d'État</h3>
       </div>
+      <div className="form__group">
+        <StartupInput options={startupOptions} value={startup} onChange={handleStartupChange} />
+      </div>
+    </div>
     </Layout>
   )
 }

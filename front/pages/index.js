@@ -158,20 +158,26 @@ async function getStartups() {
   return json.data
 }
 
+async function fetchAPI(id) {
+  try {
+    const res = await fetch(`${baseAPI}${id}`)
+    return res.json()
+  } catch {
+    return []
+  }
+}
+
 const baseAPI = 'http://127.0.0.1:5000/api/'
 async function getConventions() {
-  const res = await fetch(`${baseAPI}conventions`)
-  return res.json()
+  return fetchAPI('conventions')
 }
 
 async function getOrders() {
-  const res = await fetch(`${baseAPI}orders`)
-  return res.json()
+  return fetchAPI('orders')
 }
 
 async function getTeams() {
-  const res = await fetch(`${baseAPI}teams`)
-  const teams = await res.json()
+  const teams = await fetchAPI('conventions')
   teams.forEach(t => {
     t.ID = t.ID.split(',')
   })

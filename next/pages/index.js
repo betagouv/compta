@@ -3,20 +3,23 @@ import {useState, useCallback} from 'react'
 import Layout from '../components/Layout'
 import StartupInput from '../components/startup-input'
 
-import startupData from '../components/startups.json'
-const startups = startupData.data
+import fetch from 'isomorphic-unfetch';
 import teams from '../components/onlinesheet.team.json'
 import allConventions from '../components/onlinesheet.convention.json'
 import allOrders from '../components/onlinesheet.order.json'
 
-const startupByIds = startups.reduce((a,s) => {
-  a[s.id] = s
-  return a
-}, {})
 teams.forEach(t => {
   t.ID = t.ID.split(',')
 })
-export default function Index() {
+export default function Index({startups}) {
+  const startupOptions = startups.filter(s => {
+    return s.attributes.status !== 'death'
+  }).map(s => {
+    s.value = s.id
+    s.label = s.attributes.name
+    return s
+  })
+
   const [startup, setStartup] = useState()
   const [team, setTeam] = useState()
   const [conventions, setConventions] = useState()
@@ -53,7 +56,7 @@ export default function Index() {
             <h3>Suivi par Startup d'État</h3>
           </div>
           <div className="form__group">
-            <StartupInput value={startup} onChange={handleStartupChange} />
+            <StartupInput options={startups} value={startup} onChange={handleStartupChange} />
           </div>
         </div>
 
@@ -154,3 +157,10 @@ export default function Index() {
     </Layout>
   )
 }
+
+
+Index.getInitialProps = async () => {
+  const res = await fetch('https://beta.gouv.fr/api/v1.6/startups.json');
+  const json = await res.json();
+  return { startups: json.data };
+};

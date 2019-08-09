@@ -29,3 +29,9 @@ pip install --requirement requirements.txt --upgrade
 GOOGLE_API_KEY=VOTRE-CLE-API-GOOGLE gunicorn app:app
 python -mwebbrowser http://localhost:8000/
 ```
+
+## En production
+
+NGINX
+GUNICORN
+PM2

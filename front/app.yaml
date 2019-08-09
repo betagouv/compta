@@ -1,0 +1,6 @@
+apps:
+  - name: compta
+    script: server
+    instances: 2
+    exec_mode: cluster
+    merge_logs: true

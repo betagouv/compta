@@ -4,14 +4,8 @@ import Layout from '../components/Layout'
 import StartupInput from '../components/startup-input'
 
 import fetch from 'isomorphic-unfetch';
-import teams from '../components/onlinesheet.team.json'
-import allConventions from '../components/onlinesheet.convention.json'
-import allOrders from '../components/onlinesheet.order.json'
 
-teams.forEach(t => {
-  t.ID = t.ID.split(',')
-})
-export default function Index({startups}) {
+export default function Index({allConventions, allOrders, startups, teams}) {
   const startupOptions = startups.filter(s => {
     return s.attributes.status !== 'death'
   }).map(s => {
@@ -56,7 +50,7 @@ export default function Index({startups}) {
             <h3>Suivi par Startup d'État</h3>
           </div>
           <div className="form__group">
-            <StartupInput options={startups} value={startup} onChange={handleStartupChange} />
+            <StartupInput options={startupOptions} value={startup} onChange={handleStartupChange} />
           </div>
         </div>
 
@@ -114,7 +108,7 @@ export default function Index({startups}) {
             </tr></thead>
             <tbody>
             { conventions.map(c => (
-              <tr>
+              <tr key={c['Référence convention']}>
                 <td>{c['État'] !== '' ? 'KO': ''}</td>
                 <td>{c['Référence convention']}</td>
                 <td>{c['Type convention']}</td>
@@ -158,9 +152,36 @@ export default function Index({startups}) {
   )
 }
 
+async function getStartups() {
+  const res = await fetch('https://beta.gouv.fr/api/v1.6/startups.json')
+  const json = await res.json()
+  return json.data
+}
+
+const baseAPI = 'http://127.0.0.1:5000/api/'
+async function getConventions() {
+  const res = await fetch(`${baseAPI}conventions`)
+  return res.json()
+}
+
+async function getOrders() {
+  const res = await fetch(`${baseAPI}orders`)
+  return res.json()
+}
+
+async function getTeams() {
+  const res = await fetch(`${baseAPI}teams`)
+  const teams = await res.json()
+  teams.forEach(t => {
+    t.ID = t.ID.split(',')
+  })
+  return teams
+}
 
 Index.getInitialProps = async () => {
-  const res = await fetch('https://beta.gouv.fr/api/v1.6/startups.json');
-  const json = await res.json();
-  return { startups: json.data };
+  const allConventions = await getConventions();
+  const allOrders = await getOrders();
+  const startups = await getStartups();
+  const teams = await getTeams();
+  return { allConventions, allOrders, startups, teams };
 };

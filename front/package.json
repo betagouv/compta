@@ -23,10 +23,10 @@
     "isomorphic-unfetch": "^2.0.0",
     "next": "^8.1.0",
     "next-images": "^0.10.6",
-    "react": "^16.3.2",
-    "react-dom": "^16.3.2",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
     "react-select": "^3.0.4",
-    "template.data.gouv.fr": "^1.2.1"
+    "template.data.gouv.fr": "^1.2.2"
   },
   "devDependencies": {
     "gh-pages": "^1.2.0"

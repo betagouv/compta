@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
+
 import os
 import os.path
 import pickle
@@ -55,7 +56,7 @@ def aggregateEJ(data):
 
 
 def getsheet():
-    service = build('sheets', 'v4', developerKey=os.environ['GOOGLE_API_KEY'])
+    service = build('sheets', 'v4', developerKey=os.getenv('GOOGLE_API_KEY'))
     return service.spreadsheets()
 
 

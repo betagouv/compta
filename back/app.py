@@ -1,8 +1,12 @@
-from flask import Flask, jsonify, send_file
+from pathlib import Path
+from dotenv import load_dotenv
+env_path = Path('..') / '.env'
+load_dotenv(dotenv_path=env_path)
+
+from flask import Flask, jsonify
 from flask_cors import CORS
 import onlinesheet
-from dotenv import load_dotenv
-load_dotenv()
+
 
 app = Flask(__name__)
 CORS(app)

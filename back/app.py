@@ -37,6 +37,11 @@ def jsonifyDF(df):
 def api_conventions():
   return jsonifyDF(cache['conventions'])
 
+@app.route('/api/conventions/metadata')
+def api_convention_metadata():
+  conv = onlinesheet.getconventionmetadata()
+  return jsonifyDF(conv)
+
 @app.route('/api/orders')
 def api_orders():
   return jsonifyDF(cache['orders'])

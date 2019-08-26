@@ -10,6 +10,7 @@ Créez un fichier `.env` à la racine avec les informations suivantes:
 API_URL=http://localhost:8000/api/ # ou l'URL sur laquelle pointe l'api de votre backend
 GOOGLE_API_KEY=[clé d'API developers.google.com]
 SAMPLE_SPREADSHEET_ID=[identifiant de la feuille de calcul]
+CONVENTION_METADATA_SHEET=1sl1NhOY6Q-xGWaAIX2wS5KNqCPLmetsqxJFJTUHMkS8
 ```
 
 l'API repose sur l'API Google Sheet pour récupérer des données. Pour obtenir la clé d'API, rendez-vous sur obtenue sur https://console.developers.google.com 

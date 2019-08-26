@@ -15,19 +15,20 @@ TEAM_SHEET = 'Suivi par équipe'
 CONVENTION_SHEET = 'Conventions'
 ORDER_SHEET = 'Commandes réalisées par équipe'
 
+service = build('sheets', 'v4', developerKey=os.getenv('GOOGLE_API_KEY')).spreadsheets()
 
 def breakrange(rangestring):
     coords = rangestring.split('!')[-1]
     return [re.findall('([a-zA-Z]+|[0-9]+)', i) for i in coords.split(':')]
 
 
-def getrange(sheet, name):
-    row_result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
+def getrange(name, sheet=SAMPLE_SPREADSHEET_ID):
+    row_result = service.values().get(spreadsheetId=sheet,
                                 range='\'' + name + '\'!A:A',
                                 valueRenderOption='UNFORMATTED_VALUE').execute()
     row_values = row_result.get('range', [])
 
-    column_result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
+    column_result = service.values().get(spreadsheetId=sheet,
                                 range='\'' + name + '\'!1:1',
                                 valueRenderOption='UNFORMATTED_VALUE').execute()
     column_values = column_result.get('range', [])
@@ -42,11 +43,13 @@ def getrange(sheet, name):
     end = [column[1][0], row[1][1]]
     fullrange = ':'.join([''.join(i) for i in  [start, end]])
 
-    result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
+    result = service.values().get(spreadsheetId=sheet,
                                 range=name + '!' + fullrange,
                                 valueRenderOption='UNFORMATTED_VALUE').execute()
     values = result.get('values', [])
-    return values
+
+    df = pd.DataFrame(values[1:len(values)], columns=values[0])
+    return df
 
 
 def aggregateEJ(data):
@@ -54,31 +57,18 @@ def aggregateEJ(data):
     return df.groupby('Numéro de BdC').sum().reset_index().rename(columns={'index': 'Numéro de BdC'})
 
 
-def getsheet():
-    service = build('sheets', 'v4', developerKey=os.getenv('GOOGLE_API_KEY'))
-    return service.spreadsheets()
-
-
 def getteamdata():
-    sheet = getsheet()
-    data = getrange(sheet, TEAM_SHEET)
-    df = pd.DataFrame(data[1:len(data)], columns=data[0])
+    df = getrange(TEAM_SHEET)
     df.ID = df.ID.fillna('')
     return df
 
 
 def getconventiondata():
-    sheet = getsheet()
-    data = getrange(sheet, CONVENTION_SHEET)
-    df = pd.DataFrame(data[1:len(data)], columns=data[0])
-    return df
+    return getrange(CONVENTION_SHEET)
 
 
 def getorderdata():
-    sheet = getsheet()
-
-    data = getrange(sheet, ORDER_SHEET)
-    df = pd.DataFrame(data[1:len(data)], columns=data[0])
+    df = getrange(ORDER_SHEET)
 
     df['Numéro de BdC'] = pd.to_numeric(df['Numéro de BdC'], 'coerce', 'integer').fillna(0)
     df['Montant TTC'] = pd.to_numeric(df['Montant TTC'], 'coerce', 'integer').fillna(0)
@@ -87,7 +77,7 @@ def getorderdata():
 
 
 def generateGSAggregate():
-    df = getdata()
+    df = getorderdata()
     agg = aggregateEJ(df)
 
     now = datetime.datetime.now()

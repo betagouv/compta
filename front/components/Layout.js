@@ -30,6 +30,7 @@ const Layout = (props) => (
         <ul>
           <li><Link href="/"><a className="active">Suivi par équipe</a></Link></li>
           <li><Link href="/"><a>Suivi global</a></Link></li>
+          <li><Link href="/conventions"><a>Saisie des conventions</a></Link></li>
         </ul>
       </aside>
       <div className="main">

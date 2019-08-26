@@ -23,6 +23,10 @@ def breakrange(rangestring):
 
 
 def getrange(name, sheet=SAMPLE_SPREADSHEET_ID):
+    filename = 'onlinesheet.' + sheet + name + '.pickle'
+    df = pd.read_pickle(filename)
+    return df
+
     row_result = service.values().get(spreadsheetId=sheet,
                                 range='\'' + name + '\'!A:A',
                                 valueRenderOption='UNFORMATTED_VALUE').execute()
@@ -49,6 +53,7 @@ def getrange(name, sheet=SAMPLE_SPREADSHEET_ID):
     values = result.get('values', [])
 
     df = pd.DataFrame(values[1:len(values)], columns=values[0])
+    df.to_pickle(filename)
     return df
 
 

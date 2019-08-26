@@ -76,6 +76,10 @@ def getorderdata():
     return df
 
 
+def getconventionmetadata():
+    return getrange('Métadonnées', os.getenv('CONVENTION_METADATA_SHEET'))
+
+
 def generateGSAggregate():
     df = getorderdata()
     agg = aggregateEJ(df)

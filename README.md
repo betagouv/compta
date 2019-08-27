@@ -9,7 +9,7 @@ Créez un fichier `.env` à la racine avec les informations suivantes:
 ```txt
 API_URL=http://localhost:8000/api/ 
 # ou l'URL sur laquelle pointe l'api de votre backend
-GOOGLE_API_KEY=[clé d'API developers.google.com]
+GOOGLE_API_KEY=[clé d'API à générer sur console.developers.google.com]
 SAMPLE_SPREADSHEET_ID=[identifiant de la feuille de calcul]
 ```
 

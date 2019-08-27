@@ -20,6 +20,7 @@ def refresh():
   cache['conventions'] = onlinesheet.getconventiondata()
   cache['orders'] = onlinesheet.getorderdata()
   cache['teams'] = onlinesheet.getteamdata()
+  cache['spending'] = onlinesheet.getspendingdata()
 refresh()
 print('READY!')
 
@@ -49,3 +50,7 @@ def api_orders():
 @app.route('/api/teams')
 def api_teams():
   return jsonifyDF(cache['teams'])
+
+@app.route('/api/spending')
+def api_spending():
+  return jsonifyDF(cache['spending'])

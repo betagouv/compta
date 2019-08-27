@@ -5,7 +5,7 @@ import StartupInput from '../../components/startup-input'
 
 import fetch from 'isomorphic-unfetch';
 
-export default function Index({conventions, orders, startup, team}) {
+export default function Index({conventions, orders, startup, team, spending}) {
   return (
     <Layout>
       <div className="panel">
@@ -96,6 +96,31 @@ export default function Index({conventions, orders, startup, team}) {
           </tbody>
         </table>
       </div>
+      <div className="panel">
+        <h3>Les dépenses / consommation du budget</h3>
+        <table className="table">
+          <thead><tr>
+            <th>Personne</th>
+            <th>Mois</th>
+            <th>Jours travaillés</th>
+            <th>Frais</th>
+            <th>Montant TTC</th>
+            <th>Ref devis</th>
+          </tr></thead>
+          <tbody>
+          { spending.map(s => (
+            <tr key={s['personne']}>
+              <td>{s['personne'] }</td>
+              <td>{s['mois'] }</td>
+              <td>{s['jours travaillés'] }</td>
+              <td>{s['Frais HT']}</td>
+              <td className="amount">{s['Montant TTC']}</td>
+              <td>{s['Ref devis']}</td>
+            </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </Layout>
   )
 }
@@ -126,19 +151,25 @@ async function getTeams() {
   })
   return teams
 }
+async function getSpending() {
+  return fetchAPI('spending')
+}
 
 Index.getInitialProps = async ({startup}) => {
   const allConventions = await getConventions();
   const allOrders = await getOrders();
   const teams = await getTeams();
+  const allSpending = await getSpending()
 
   const team = teams.find(t => t.ID.includes(startup.id))
   const conventions = allConventions.filter(item => item['Équipe'] === team['Équipe'])
   const orders = allOrders.filter(item => item['Équipe'] === team['Équipe'])
+  const spending = allSpending.filter(item => item['Équipe'] === team['Équipe'])
   return {
     conventions,
     orders,
     startup,
-    team
+    team,
+    spending,
   }
 }

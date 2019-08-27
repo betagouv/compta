@@ -14,6 +14,7 @@ SAMPLE_SPREADSHEET_ID = os.getenv('SAMPLE_SPREADSHEET_ID')
 TEAM_SHEET = 'Suivi par équipe'
 CONVENTION_SHEET = 'Conventions'
 ORDER_SHEET = 'Commandes réalisées par équipe'
+SPENDING_SHEET = 'Suivi dépense'
 
 service = build('sheets', 'v4', developerKey=os.getenv('GOOGLE_API_KEY')).spreadsheets()
 
@@ -85,6 +86,10 @@ def getorderdata():
 
 def getconventionmetadata():
     return getrange('Métadonnées', os.getenv('CONVENTION_METADATA_SHEET'))
+
+
+def getspendingdata():
+    return getrange(SPENDING_SHEET)
 
 
 def generateGSAggregate():

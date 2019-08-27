@@ -23,38 +23,40 @@ def breakrange(rangestring):
 
 
 def getrange(name, sheet=SAMPLE_SPREADSHEET_ID):
-    filename = 'onlinesheet.' + sheet + name + '.pickle'
-    df = pd.read_pickle(filename)
-    return df
+    try:
+        filename = 'onlinesheet.' + sheet + name + '.pickle'
+        df = pd.read_pickle(filename)
+        return df
 
-    row_result = service.values().get(spreadsheetId=sheet,
-                                range='\'' + name + '\'!A:A',
-                                valueRenderOption='UNFORMATTED_VALUE').execute()
-    row_values = row_result.get('range', [])
+    except FileNotFoundError:
+        row_result = service.values().get(spreadsheetId=sheet,
+                                    range='\'' + name + '\'!A:A',
+                                    valueRenderOption='UNFORMATTED_VALUE').execute()
+        row_values = row_result.get('range', [])
 
-    column_result = service.values().get(spreadsheetId=sheet,
-                                range='\'' + name + '\'!1:1',
-                                valueRenderOption='UNFORMATTED_VALUE').execute()
-    column_values = column_result.get('range', [])
+        column_result = service.values().get(spreadsheetId=sheet,
+                                    range='\'' + name + '\'!1:1',
+                                    valueRenderOption='UNFORMATTED_VALUE').execute()
+        column_values = column_result.get('range', [])
 
-    if not row_values or not column_values:
-        raise ValueError
+        if not row_values or not column_values:
+            raise ValueError
 
-    row = breakrange(row_values)
-    column = breakrange(column_values)
-    
-    start = row[0]
-    end = [column[1][0], row[1][1]]
-    fullrange = ':'.join([''.join(i) for i in  [start, end]])
+        row = breakrange(row_values)
+        column = breakrange(column_values)
 
-    result = service.values().get(spreadsheetId=sheet,
-                                range=name + '!' + fullrange,
-                                valueRenderOption='UNFORMATTED_VALUE').execute()
-    values = result.get('values', [])
+        start = row[0]
+        end = [column[1][0], row[1][1]]
+        fullrange = ':'.join([''.join(i) for i in  [start, end]])
 
-    df = pd.DataFrame(values[1:len(values)], columns=values[0])
-    df.to_pickle(filename)
-    return df
+        result = service.values().get(spreadsheetId=sheet,
+                                    range=name + '!' + fullrange,
+                                    valueRenderOption='UNFORMATTED_VALUE').execute()
+        values = result.get('values', [])
+
+        df = pd.DataFrame(values[1:len(values)], columns=values[0])
+        df.to_pickle(filename)
+        return df
 
 
 def aggregateEJ(data):

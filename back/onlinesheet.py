@@ -75,12 +75,20 @@ def getconventiondata():
     return getrange(CONVENTION_SHEET)
 
 
+
 def getorderdata():
-    df = getrange(ORDER_SHEET)
+    orders = getrange(ORDER_SHEET)
+    orders['Numéro de BdC'] = pd.to_numeric(orders['Numéro de BdC'], 'coerce',                                'integer').fillna(0)
+    orders['Montant TTC'] = pd.to_numeric(orders['Montant TTC'], 'coerce', 'integer').fillna(0)
 
-    df['Numéro de BdC'] = pd.to_numeric(df['Numéro de BdC'], 'coerce', 'integer').fillna(0)
-    df['Montant TTC'] = pd.to_numeric(df['Montant TTC'], 'coerce', 'integer').fillna(0)
+    spending_raw = getrange(SPENDING_SHEET)
+    spending = spending_raw[["Presta", "Réf devis",  "Montant TTC"]]
+    spending_per_order = spending.groupby(["Presta", "Réf devis"]).sum().rename(columns={
+        'Montant TTC':'Consommé'}).reset_index()
 
+    df = pd.merge(orders, spending_per_order, on=["Presta", "Réf devis"], how="outer")
+    df['consommé_pourcent'] = df.apply(lambda x: (x['Consommé'] / x['Montant TTC'] *
+                                                  100), axis=1)
     return df
 
 
@@ -128,7 +136,7 @@ def sanitycheck():
 
 
 def main():
-    sanitycheck()
+    get_consommation()
 
 
 if __name__ == '__main__':

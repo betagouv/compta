@@ -71,3 +71,10 @@ python -mwebbrowser http://localhost:8000/
 NGINX
 GUNICORN
 PM2
+
+
+## informations complémentaires
+
+Les colonnes suivantes devront être utilisées pour représenter les  dépenses
+
+Équipe	personne	mois	jours travaillés	Frais HT	Entreprise	Presta	Réf devis	TJM (base HT)	TJM HT Markupé	Montant HT	Montant TTC

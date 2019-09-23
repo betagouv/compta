@@ -1,9 +1,10 @@
+
 from pathlib import Path
 from dotenv import load_dotenv
 env_path = Path('..') / '.env'
 load_dotenv(dotenv_path=env_path)
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, make_response
 from flask_cors import CORS
 import onlinesheet
 
@@ -29,7 +30,9 @@ def api_refresh():
   return jsonify({'status': 'OK'})
 
 def jsonifyDF(df):
-  return df.to_json(orient="records")
+  resp = make_response(df.to_json(orient="records"))
+  resp.headers['Content-Type'] = 'application/json'
+  return resp
 
 @app.route('/api/conventions')
 def api_conventions():

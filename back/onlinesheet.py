@@ -10,7 +10,7 @@ from googleapiclient.discovery import build
 
 
 # The ID and range of a sample spreadsheet.
-SAMPLE_SPREADSHEET_ID = '1pZYJvjUeMPF2oWzDOp6SC-CECcb3zmt5xq-udeEcELg'
+SAMPLE_SPREADSHEET_ID = os.getenv('SAMPLE_SPREADSHEET_ID')
 TEAM_SHEET = 'Suivi par équipe'
 CONVENTION_SHEET = 'Conventions'
 ORDER_SHEET = 'Commandes réalisées par équipe'
@@ -55,7 +55,7 @@ def aggregateEJ(data):
 
 
 def getsheet():
-    service = build('sheets', 'v4', developerKey=os.environ['GOOGLE_API_KEY'])
+    service = build('sheets', 'v4', developerKey=os.getenv('GOOGLE_API_KEY'))
     return service.spreadsheets()
 
 

@@ -101,7 +101,7 @@ export default function Index({conventions, orders, startup, team}) {
 }
 
 
-const baseAPI = 'https://api.compta.beta.gouv.fr/api/'
+const baseAPI = process.env.API_URL
 async function fetchAPI(id) {
   try {
     const res = await fetch(`${baseAPI}${id}`)
